@@ -1,0 +1,179 @@
+<!--standard valid html5 boilerplate -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Just Tell Me The Score</title>
+<script src="https://unpkg.com/vue@3"></script>
+<!-- Roboto Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+
+    /** Cool Dark Theme */
+    body {
+        background-color: #1e1e1e;
+        color: #fff;
+    }
+    /** Reset CSS */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /** Set Body Font */
+    body {
+        /** Cool Monospace Font */
+        font-family: 'Roboto Mono', monospace;
+    }
+    /** Create Grid Inside of Main */
+    main {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-gap: 1rem;
+        padding: 1rem;
+    }
+
+    /** Style Each Game Div  in a dark theme but big and with some color for the scores. */
+
+    .game {
+        background-color: #2e2e2e;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    /** Style Game Div P Tags Brightly and large for readability **/
+    .game p {
+        /** Cool Red Font For Score */
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .card-header {
+        background-color: #2e2e2e;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 1rem;
+        text-align: center;
+        font-size: 1rem;
+    }
+  
+
+    /** Style Header  in a dark theme */
+    header {
+        background-color: #2e2e2e;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    /** Style Paragraphs */
+    p {
+        margin: 0;
+    }
+
+    /** Style H1 */
+
+    h1 {
+        margin: 0;
+    }
+    
+    /** SelectedGame Area Very Large, Centered so you can read it from far away **/
+    #selectedGame {
+        background-color: #2e2e2e;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 1rem;
+        text-align: center;
+        font-size: 3rem;
+        width:98%;
+        margin:0 auto;
+        z-index: 999;
+    }
+
+    .selectedGame__score {
+        font-size: 8rem;
+    }
+
+</style>
+
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1>Just Tell Me The Score</h1>
+        </header>
+        
+        <main>
+            <!-- Div Containing Each Current Score -->
+
+            <div @click="selectedGameIndex = index; selectedGame = true;" class="game" v-for="(game,index) in currentGames" :key="game.id">
+                <!-- Include Team Names -->
+                
+                <p class="card-header">{{game.competitions[0].competitors[0].team.displayName}} vs {{game.competitions[0].competitors[1].team.displayName}}</p>
+                <p>{{game.competitions[0].competitors[0].score}} - {{game.competitions[0].competitors[1].score}}</p>
+                <!-- Include Time Left -->
+                <p>{{game.status.type.shortDetail}}</p>
+            </div>
+
+        </main>
+
+        <section v-if="selectedGame" id="selectedGame">
+            <h1>
+                {{currentGames[selectedGameIndex].competitions[0].competitors[0].team.displayName}} vs {{currentGames[selectedGameIndex].competitions[0].competitors[1].team.displayName}}
+            </h1>
+            <p class="selectedGame__score">{{currentGames[selectedGameIndex].competitions[0].competitors[0].score}} - {{currentGames[selectedGameIndex].competitions[0].competitors[1].score}}</p>
+            <p>{{currentGames[selectedGameIndex].status.type.shortDetail}}</p>
+        </section>
+    </div>
+
+<script>
+
+
+    const app = Vue.createApp(
+    {
+        data:function() {
+            return {
+                currentGames: [],
+                selectedGameIndex: 0,
+                selectedGame:false
+            }
+        },
+
+        methods: {
+            getScores() {
+                var endpoint = "//site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard";
+                fetch(endpoint)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.events.forEach(event => {
+                            this.currentGames = data.events;
+                        });
+                    })
+            }
+        },
+
+        mounted() {
+            /** Run getScores every 20 seconds */
+            this.getScores();
+            setInterval(this.getScores, 30000);
+        }
+    }
+    );
+
+    app.mount("#app");
+
+
+
+
+        
+    </script>
+</body>
+</html>
